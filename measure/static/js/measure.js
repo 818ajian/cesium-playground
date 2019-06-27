@@ -12,21 +12,20 @@ var viewer;
 // Cesium event handler
 var handler;
 
-// Billboard entity at starting position of line
-var startBillboard = null;
-var startPosition = null;
+// position buffer, it will be cleared when a polyline is completed
+var positions = [];
 
-// Polyline entity which is drawed during moving mouse
-var movingLine = null;
-var movingPosition = null;
+// Polyline entity which is drawed when the measurement is not completed
+var activeLine = null;
 
-// Polyline of completed measurement
+// Polylines of completed measurement
 var completedLines = [];
 
 $(document).ready(function () {
 
     viewer = new Cesium.Viewer('cesiumContainer', {
-        selectionIndicator: false
+        selectionIndicator: false,
+        infoBox: false
     });
     
     load3DTileset(TILESET);
@@ -43,54 +42,34 @@ $(document).ready(function () {
             // using 2D window's position to get 3D world position
             let worldPosition = viewer.scene.pickPosition(windowPosition);
 
-            // start position of a measurement line hasn't been picked
-            if (startBillboard == null) {
+            positions.push(worldPosition);
 
-                $("body").css("cursor", "crosshair");
+            // create billboard
+            viewer.entities.add({
+                position: worldPosition,
+                billboard: {
+                    image : 'static/image/pin_red.png',
+                    pixelOffset : new Cesium.Cartesian2(0, -16),
+                    scale : 1.0,
+                    width : 24,
+                    height : 32,
+                    disableDepthTestDistance: Number.POSITIVE_INFINITY
+                }
+            });
 
-                startBillboard = viewer.entities.add({
-                    position: worldPosition,
-                    billboard: {
-                        image : 'static/image/pin_red.png',
-                        pixelOffset : new Cesium.Cartesian2(0, -16),
-                        scale : 1.0,
-                        width : 24,
-                        height : 32,
-                        disableDepthTestDistance: Number.POSITIVE_INFINITY
-                    }
-                });
+            // if there're more than two selected positions, show distance label on each line segment
+            if (positions.length >= 2) {
 
-                startPosition = worldPosition;
-            
-            // start point has been picked, but end point hasn't been picked
-            } else if (startBillboard != null) {
+                let currentPosition = positions[positions.length - 1];
+                let previousPosition = positions[positions.length - 2];
 
-                $("body").css("cursor", "auto");
+                let distance = calculateDistance([currentPosition, previousPosition]);
 
-                viewer.entities.add({
-                    position: worldPosition,
-                    billboard: {
-                        image : 'static/image/pin_red.png',
-                        pixelOffset : new Cesium.Cartesian2(0, -16),
-                        scale : 1.0,
-                        width : 24,
-                        height : 32,
-                        disableDepthTestDistance: Number.POSITIVE_INFINITY
-                    }
-                });
-
-                startBillboard = null;
-
-                completedLines.push(movingLine);
-                movingLine = null;
-
-                let distance = Cesium.Cartesian3.distance(startPosition, worldPosition)
-
-                // draw distance label
+                // draw distance label on center of line segment
                 let center = new Cesium.Cartesian3(
-                    (worldPosition.x + startPosition.x)/2,
-                    (worldPosition.y + startPosition.y)/2,
-                    (worldPosition.z + startPosition.z)/2
+                    (currentPosition.x + previousPosition.x)/2,
+                    (currentPosition.y + previousPosition.y)/2,
+                    (currentPosition.z + previousPosition.z)/2
                 );
 
                 viewer.entities.add({
@@ -101,16 +80,13 @@ $(document).ready(function () {
                         disableDepthTestDistance: Number.POSITIVE_INFINITY,
                     }
                 });
-
-                $('#distance-tag').css('display', 'none');
             }
         }
-
-    }, Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
+    }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
 
     handler.setInputAction((move) => {
 
-        if (startBillboard != null) {
+        if (positions.length >= 1) {
 
             let windowPosition = move.endPosition;
 
@@ -118,33 +94,86 @@ $(document).ready(function () {
 
                 let worldPosition = viewer.scene.pickPosition(windowPosition);
 
-                movingPosition = worldPosition;
+                let movingPositions = positions.slice();
+                movingPositions.push(worldPosition);
 
-                if (movingLine == null) {
+                if (activeLine == null) {
 
-                    movingLine = viewer.entities.add({
+                    activeLine = viewer.entities.add({
                         polyline : {
-                            positions : [startPosition, worldPosition],
+                            positions : movingPositions,
                             width : 2,
                             material : new Cesium.PolylineDashMaterialProperty({
                                 color: Cesium.Color.WHITE
                             }),
                             depthFailMaterial: new Cesium.PolylineDashMaterialProperty({
-                                color: Cesium.Color.RED.withAlpha(0.5)
+                                color: Cesium.Color.RED
                             })
                         }
                     });
 
                 } else {
-                    movingLine.polyline.positions = [startPosition, worldPosition];
+
+                    activeLine.polyline.positions = movingPositions;
                 }
 
-                let distance = Cesium.Cartesian3.distance(startPosition, worldPosition);
-                $('#distance-tag').css('display', 'inline-block').text(Math.floor(distance*100) / 100 + ' m');
+                // show total distance label beside mouse cursor
+                let distance = calculateDistance(movingPositions);
+                $('#distance-tag').css('display', 'inline-block').text(Math.floor(distance * 100) / 100 + ' m');
             }
         }
 
     }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
+
+    handler.setInputAction((click) => {
+
+        if (positions.length >= 1) {
+
+            $('#distance-tag').css('display', 'none');
+
+            // get position of 2D window (X,Y)
+            let windowPosition = click.position;
+
+            if (windowPosition) {
+
+                // using 2D window's position to get 3D world position
+                let worldPosition = viewer.scene.pickPosition(windowPosition);
+
+                positions.push(worldPosition);
+
+                viewer.entities.add({
+                    position: worldPosition,
+                    billboard: {
+                        image : 'static/image/pin_red.png',
+                        pixelOffset : new Cesium.Cartesian2(0, -16),
+                        scale : 1.0,
+                        width : 24,
+                        height : 32,
+                        disableDepthTestDistance: Number.POSITIVE_INFINITY
+                    }
+                });
+        
+                let distance = calculateDistance(positions);;
+        
+                // draw total distance label
+                viewer.entities.add({
+                    position : positions[positions.length - 1],
+                    label : {
+                        text : Math.floor(distance * 100) / 100 + ' m',
+                        font: '16px sans-serif',
+                        disableDepthTestDistance: Number.POSITIVE_INFINITY,
+                    }
+                });
+        
+                completedLines.push(activeLine);
+
+                // reset
+                activeLine = null;
+                positions = [];
+            }
+        }
+
+    }, Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
 });
 
 $(document).on('mousemove', function(e){
@@ -174,14 +203,22 @@ function debug(de = true) {
     //tileset.debugShowGeometricError = de;
 }
 
-function closeImagery() {
-    viewer.scene.imageryLayers.get(0).show = false;
-}
-
-function openImagery() {
-    viewer.scene.imageryLayers.get(0).show = true;
-}
-
 function see() {
     viewer.zoomTo(tileset);
+}
+
+/**
+ * calculate the distance of line segments
+ * @param {Array} positions array of cartesian3
+ */
+function calculateDistance(positions) {
+
+    let distance = 0;
+
+    for (let i = 1; i < positions.length; i++) {
+
+        distance += Cesium.Cartesian3.distance(positions[i], positions[i-1]);
+    }
+
+    return distance;
 }
