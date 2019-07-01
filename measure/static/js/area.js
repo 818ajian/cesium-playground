@@ -1,7 +1,7 @@
 const DEBUG = true;
 
 // tileset path
-var TILESET = 'static/tile/___';
+var TILESET = 'static/tile/sample/tileset.json';
 
 // 3DTileset entity
 var tileset;
@@ -33,6 +33,8 @@ $(document).ready(function () {
             requestVertexNormals : true
         })
     });
+
+    load3DTileset(TILESET);
     
     handler = new Cesium.ScreenSpaceEventHandler(viewer.canvas);
 
@@ -261,4 +263,19 @@ function showCursorLabel(show) {
 
         $('#area-tag').css('display', 'none');
     }
+}
+
+function translate(x, y, z) {
+
+    let xRadian = Cesium.Math.toRadians(x);
+    let yRadian = Cesium.Math.toRadians(y);
+
+    var cartographic = Cesium.Cartographic.fromCartesian(tileset.boundingSphere.center);
+    var surface = Cesium.Cartesian3.fromRadians(cartographic.longitude, cartographic.latitude, 0.0);
+    var offset = Cesium.Cartesian3.fromRadians(cartographic.longitude + yRadian, cartographic.latitude + xRadian, z);
+    var translation = Cesium.Cartesian3.subtract(offset, surface, new Cesium.Cartesian3());
+
+    let origin = tileset.modelMatrix.clone();
+
+    Cesium.Matrix4.multiply(origin, Cesium.Matrix4.fromTranslation(translation), tileset.modelMatrix);
 }
