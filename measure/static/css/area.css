@@ -1,0 +1,29 @@
+html,
+body,
+#cesiumContainer {
+    width: 100%;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    position: relative;
+    cursor: crosshair;
+}
+
+.cesium-viewer-bottom,
+.cesium-viewer-animationContainer,
+.cesium-viewer-timelineContainer {
+    display: none;
+}
+
+#area-tag {
+    position: fixed;
+    z-index: 99;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    border-radius: 2px;
+    min-width: 1rem;
+    font-size: 0.8rem;
+    padding: 0.3rem;
+    display: none;
+}
