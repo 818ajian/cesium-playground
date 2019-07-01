@@ -173,7 +173,7 @@ $(document).ready(function () {
             }
         }
 
-    }, Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
+    }, Cesium.ScreenSpaceEventType.RIGHT_CLICK);
 });
 
 $(document).on('mousemove', function(e){
@@ -191,7 +191,6 @@ function load3DTileset(url, debug = false) {
         debugColorizeTiles: debug,
         debugShowBoundingVolume: debug,
         // debugShowGeometricError: debug,
-        maximumScreenSpaceError: 128
     }));
 
     see();
