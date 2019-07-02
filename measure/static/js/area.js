@@ -1,7 +1,7 @@
 const DEBUG = true;
 
 // tileset path
-var TILESET = 'static/tile/sample/tileset.json';
+var TILESET = 'static/tile/road/tile_0_0_0_tex/tileset.json';
 
 // 3DTileset entity
 var tileset;
@@ -31,10 +31,25 @@ $(document).ready(function () {
         infoBox: false,
         terrainProvider : Cesium.createWorldTerrain({
             requestVertexNormals : true
-        })
+        }),
+        animation: false,
+        timeline: false,
+        homeButton: false,
+        infoBox: false,
+        sceneModePicker: true,
+        baseLayerPicker: false,
+        navigationHelpButton: false,
+        scene3DOnly: false,
+        fullscreenButton: false,
+        vrButton: false,
     });
 
-    load3DTileset(TILESET);
+    viewer.scene.globe.depthTestAgainstTerrain = true;
+
+    load3DTileset(TILESET, false, () => {
+
+        translate(0, 0, 100);
+    });
     
     handler = new Cesium.ScreenSpaceEventHandler(viewer.canvas);
 
@@ -137,7 +152,7 @@ $(document).ready(function () {
                 viewer.entities.add({
                     position : selectedPositions[selectedPositions.length - 1],
                     label : {
-                        text : Math.floor((selectedArea / 1e6) * 100) / 100 + ' km2',
+                        text : getApproximatedValue(selectedArea),
                         font: '16px sans-serif',
                         disableDepthTestDistance: Number.POSITIVE_INFINITY,
                         showBackground: true
@@ -154,26 +169,6 @@ $(document).ready(function () {
             }
         }
 
-        // if (positions.length >= 1) {
-
-        //     $('#distance-tag').css('display', 'none');
-
-        //     // get position of 2D window (X,Y)
-        //     let windowPosition = click.position;
-
-        //     if (windowPosition) {
-
-        //         // using 2D window's position to get 3D world position
-        //         let worldPosition = viewer.scene.pickPosition(windowPosition);
-
-        //         positions.push(worldPosition);
-
-        //         // reset
-        //         activeLine = null;
-        //         positions = [];
-        //     }
-        // }
-
     }, Cesium.ScreenSpaceEventType.RIGHT_CLICK);
 });
 
@@ -184,17 +179,26 @@ $(document).on('mousemove', function(e){
     });
 });
 
-function load3DTileset(url, debug = false) {
+function load3DTileset(url, debug = false, callback) {
     tileset = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
         url : url,
         skipLevelOfDetail: false,
-        dynamicScreenSpaceError: true,
+        maximumScreenSpaceError: 512,
+
         debugColorizeTiles: debug,
         debugShowBoundingVolume: debug,
         // debugShowGeometricError: debug,
     }));
 
-    see();
+    tileset.readyPromise.then(() => {
+
+        see();
+
+        if (typeof callback === 'function') {
+
+            callback();
+        }
+    });
 }
 
 function debug(de = true) {
@@ -248,9 +252,7 @@ function calculateTriangleArea(pointA, pointB, pointC) {
 
 function setCursorLabel(area) {
 
-    kmArea = area / 1e6;
-
-    $('#area-tag').text(Math.floor(area * 100) / 100 + ' km2');
+    $('#area-tag').text(getApproximatedValue(area));
 }
 
 function showCursorLabel(show) {
@@ -278,4 +280,16 @@ function translate(x, y, z) {
     let origin = tileset.modelMatrix.clone();
 
     Cesium.Matrix4.multiply(origin, Cesium.Matrix4.fromTranslation(translation), tileset.modelMatrix);
+}
+
+function getApproximatedValue(area) {
+
+    if (area > 1e6) {
+
+        return (Math.floor(area / 1e4)/100) + ' km2';
+    
+    } else {
+
+        return (Math.floor(area * 100)/100) + ' m2';
+    }
 }
