@@ -63,11 +63,11 @@ $(document).ready(function () {
             // using 2D window's position to get 3D world position
             let worldPosition = viewer.scene.pickPosition(windowPosition);
 
+            drawPositionLabel(worldPosition);
+
             selectedPositions.push(worldPosition);
 
             if (selectedPositions.length == 3) {
-
-                selectedPositions.push(worldPosition);
 
                 // draw triangle
                 activeTriangle.polygon.hierarchy = selectedPositions;
@@ -139,6 +139,8 @@ $(document).ready(function () {
 
                 selectedPositions.push(worldPosition);
 
+                drawPositionLabel(worldPosition);
+
                 // draw triangle
                 activeTriangle.polygon.hierarchy = selectedPositions;
                 triangles.push(activeTriangle);
@@ -149,11 +151,11 @@ $(document).ready(function () {
                 selectedArea += area;
 
                 // draw label
-                viewer.entities.add({
+                let label = viewer.entities.add({
                     position : selectedPositions[selectedPositions.length - 1],
                     label : {
                         text : getApproximatedValue(selectedArea),
-                        font: '16px sans-serif',
+                        font: '16px Microsoft JhengHei',
                         disableDepthTestDistance: Number.POSITIVE_INFINITY,
                         showBackground: true
                     }
@@ -286,10 +288,48 @@ function getApproximatedValue(area) {
 
     if (area > 1e6) {
 
-        return (Math.floor(area / 1e4)/100) + ' km2';
+        return 'Area: ' + (Math.floor(area / 1e4)/100) + ' km2';
     
     } else {
 
-        return (Math.floor(area * 100)/100) + ' m2';
+        return 'Area: ' + (Math.floor(area * 100)/100) + ' m2';
     }
+}
+
+function drawPositionLabel(worldPosition) {
+
+    let lineHeight = 5;
+    let padding = 0.5;
+
+    let carto = Cesium.Cartographic.fromCartesian(worldPosition);
+
+    // draw vertical line on point
+    let lineTop = Cesium.Cartesian3.fromRadians(carto.longitude, carto.latitude, carto.height + lineHeight);
+
+    viewer.entities.add({
+        polyline : {
+            positions : [worldPosition, lineTop],
+            width : 1,
+            material : Cesium.Color.WHITE,
+            clampToGround : false,
+            distanceDisplayCondition: new Cesium.DistanceDisplayCondition(0, 500)
+        }
+    });
+
+    let labelPosition = Cesium.Cartesian3.fromRadians(carto.longitude, carto.latitude, carto.height + lineHeight + padding);
+
+    let textLatitude = Math.floor(carto.latitude * (180 / Math.PI) * 100) / 100;
+    let textLongitude = Math.floor(carto.longitude * (180 / Math.PI) * 100) / 100;
+    let textHeight = Math.floor(carto.height * 100) / 100;
+
+    viewer.entities.add({
+        position : labelPosition,
+        label : {
+            text : '(' + textLatitude + ', ' + textLongitude + ', ' + textHeight + ')',
+            font: '12px Microsoft JhengHei',
+            disableDepthTestDistance: Number.POSITIVE_INFINITY,
+            showBackground: true,
+            distanceDisplayCondition: new Cesium.DistanceDisplayCondition(0, 500)
+        }
+    });
 }
