@@ -1,0 +1,85 @@
+
+html, body {
+    background: rgb(30, 30, 30);
+    color: white;
+}
+
+.cesium-viewer-bottom,
+.cesium-viewer-animationContainer,
+.cesium-viewer-timelineContainer {
+    display: none;
+}
+
+#control__panel {
+    padding: 1rem 1% 3rem 1%;
+}
+
+.control__section-title {
+
+    text-align: center;
+    font-size: 1.5rem;
+    padding: 3rem 0 2rem 0;
+}
+
+#sensor-section {
+    display: inline-flex;
+    width: 100%;
+    min-height: 200px;
+}
+
+.control__sensor-block {
+    flex: 1;
+    margin: 5px;
+    justify-content: center;
+}
+
+.control__sensor-block input[name='sensor'] {
+    margin-left: 0rem;
+}
+
+.sensor-dimension {
+
+    font-size: 0.8rem;
+    color: grey;
+}
+
+.control__sensor-description {
+    text-align: left;
+}
+
+.slide-label {
+
+    display: inline-block;
+    padding: 5px;
+    text-align: center;
+    width: 12%;
+}
+
+.slide-container {
+    display: inline-block;
+    padding: 5px;
+    width: 72%;
+}
+
+.slide-container input[type="range"] {
+    width: 100%;
+}
+
+#focal-value {
+
+    text-align: center;
+}
+
+#fov-section {
+    text-align: center;
+}
+
+b {
+    color: red;
+}
+
+#cesiumContainer {
+    width: 600px;
+    height: 400px;
+    margin-left: calc(50% - 300px);;
+}

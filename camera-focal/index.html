@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <link rel="shortcut icon" href="static/image/logo.png">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+  <title>Camera Focal | Earthbook</title>
+  <script src="static/vendor/jquery-3.3.1.min.js"></script>
+  <script src="static/vendor/Cesium/Cesium.js"></script>
+  <style>
+    @import url(static/vendor/Cesium/Widgets/widgets.css);
+  </style>
+  <link rel="stylesheet" type="text/css" href="static/css/camera.css">
+</head>
+
+<body>
+  <div id="control__panel">
+    <div class="control__section-title">Select Sensor Dimension</div>
+    <div id="sensor-section" class="control__section">
+      <div class="control__sensor-block">
+        <input type="radio" class="control__sensor-input" name="sensor" value="ff" checked />
+        <div class="control__sensor-description">
+          <h3>Full Frame</h3>
+          <div class="sensor-dimension">36mm x 24mm</div>
+          <p>Standard Sensor size of most DSLR(e.g. Sony A7RIII, Canon EOS R, Nikon Z6/7).</p>
+        </div>
+      </div>
+      <div class="control__sensor-block">
+        <input type="radio" class="control__sensor-input" name="sensor" value="apsc-nikon" />
+        <div class="control__sensor-description">
+          <h3>APS-C</h3>
+          <div class="sensor-dimension">23.6mm x 15.7mm</div>
+          <p>Sensors on entry-level cameras from Nikon, Sony, Fuji.</p>
+        </div>
+      </div>
+      <div class="control__sensor-block">
+        <input type="radio" class="control__sensor-input" name="sensor" value="apsc-canon" />
+        <div class="control__sensor-description">
+          <h3>APS-C</h3>
+          <div class="sensor-dimension">22.2mm x 14.8mm</div>
+          <p>Sensors on entry-level cameras from Canon.</p>
+        </div>
+      </div>
+      <div class="control__sensor-block">
+        <input type="radio" class="control__sensor-input" name="sensor" value="m43" />
+        <div class="control__sensor-description">
+          <h3>Four Third Sytem(m43)</h3>
+          <div class="sensor-dimension">17.3mm x 13mm</div>
+          <p>
+            Sensors size of most Panasonic and Olympus DSLRs.<br />
+            Unlike other sensors which use 2:3 aspect ratio, M43 sensors use 3:4 aspect ratio for sensor dimension.
+          </p>
+        </div>
+      </div>
+      <div class="control__sensor-block">
+        <input type="radio" class="control__sensor-input" name="sensor" value="1inch">
+        <div class="control__sensor-description">
+          <h3>1 Inch</h3>
+          <div class="sensor-dimension">13.2mm x 8.8mm</div>
+          <p>
+            Sensor size of compact digital cameras and most of <b>drones</b> (DJI Phantom 4 series, DJI Mavic 2).
+          </p>
+        </div>
+      </div>
+      <div class="control__sensor-block">
+        <input type="radio" class="control__sensor-input" name="sensor" value="phone">
+        <div class="control__sensor-description">
+          <div class="control__sensor-description">
+            <h3>1/2.3 Inch</h3>
+            <div class="sensor-dimension">6.17mm x 4.55mm</div>
+            <p>
+              Sensor size of smartphone cameras and entry-level <b>drones</b> (DJI Phantom 3 series, DJI Mavic
+              Pro/Zoom/Air).
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="control__section-title">Adjust Lens Focal Length</div>
+    <div id="focal-section" class="control__section">
+      <div id="focal-value">24mm</div>
+      <div class="slide-label">24mm (Wide angle lens)</div>
+      <div class="slide-container">
+        <input type="range" name="focal" min="24" max="200" value="24" />
+      </div>
+      <div class="slide-label">200mm (Telephoto lens)</div>
+    </div>
+    <div class="control__section-title">Computed View Angle</div>
+    <div id="fov-section" class="control__section">
+      horizontal view angle is <b id="horizontal-angle">--</b>°, vertical view angle is <b id="vertical-angle">--</b>°
+    </div>
+  </div>
+  <div id="cesiumOuterContainer">
+    <div id="cesiumContainer"></div>
+  </div>
+  <script src="static/js/camera.js"></script>
+</body>
+
+</html>
