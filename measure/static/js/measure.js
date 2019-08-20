@@ -23,6 +23,8 @@ var completedLines = [];
 
 $(document).ready(function () {
 
+    Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIwNjZlN2NjYS0zZjYwLTQ1NzktOWFiOS0zZDVkNWY4MTliMGYiLCJpZCI6MzMyLCJpYXQiOjE1MjUyMjE5MDV9.Z9xKbte6Y5q0wM58jh81ALeIkHfH_LVUoia3d-H2Oog';
+
     viewer = new Cesium.Viewer('cesiumContainer', {
         selectionIndicator: false,
         infoBox: false
@@ -39,8 +41,16 @@ $(document).ready(function () {
 
         if (windowPosition) {
 
+            let ray = viewer.camera.getPickRay(windowPosition);
+            let pickedPosition = viewer.scene.globe.pick(ray, viewer.scene);
+             
             // using 2D window's position to get 3D world position
             let worldPosition = viewer.scene.pickPosition(windowPosition);
+
+            console.log('drawer position:');
+            console.log(pickedPosition);
+            console.log('our world position');
+            console.log(worldPosition);
 
             positions.push(worldPosition);
 
@@ -51,6 +61,19 @@ $(document).ready(function () {
                     image : 'static/image/pin_red.png',
                     pixelOffset : new Cesium.Cartesian2(0, -16),
                     scale : 1.0,
+                    width : 24,
+                    height : 32,
+                    disableDepthTestDistance: Number.POSITIVE_INFINITY
+                }
+            });
+
+            // create for pickedposition
+            viewer.entities.add({
+                position: pickedPosition,
+                billboard: {
+                    image : 'static/image/pin_red.png',
+                    pixelOffset : new Cesium.Cartesian2(0, -16),
+                    scale : 5.0,
                     width : 24,
                     height : 32,
                     disableDepthTestDistance: Number.POSITIVE_INFINITY
@@ -188,6 +211,7 @@ function load3DTileset(url, debug = false) {
         url : url,
         skipLevelOfDetail: false,
         dynamicScreenSpaceError: true,
+        maximumScreenSpaceError: 64,
         debugColorizeTiles: debug,
         debugShowBoundingVolume: debug,
         // debugShowGeometricError: debug,
