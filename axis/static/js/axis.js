@@ -1,12 +1,16 @@
 var viewer;
-
+let cesiumWorldTerrainProvider, ellipsoidTerrainProvider;
 $(document).ready(function () {
 
-    Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIwNjZlN2NjYS0zZjYwLTQ1NzktOWFiOS0zZDVkNWY4MTliMGYiLCJpZCI6MzMyLCJpYXQiOjE1MjUyMjE5MDV9.Z9xKbte6Y5q0wM58jh81ALeIkHfH_LVUoia3d-H2Oog';
+    ellipsoidTerrainProvider = new Cesium.EllipsoidTerrainProvider();
+
+    Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI5M2NjNmVhMi0yODBkLTQxY2MtYWZhNC1kZjdjODE4MDk5ZmQiLCJpZCI6MzMyLCJzY29wZXMiOlsiYXNyIiwiZ2MiXSwiaWF0IjoxNTY2NDU3Njk2fQ.B8x7K0EDFe851UAkl-ZNoECepNPTZksTr4syp1alP8E';
     viewer = new Cesium.Viewer('cesiumContainer', {
-        selectionIndicator: false
+        selectionIndicator: false,
+        terrainProvider: Cesium.createWorldTerrain()
     });
-    
+
+    cesiumWorldTerrainProvider = viewer.terrainProvider;
 
     let xAxis = viewer.entities.add({
         name : 'X axis',
@@ -41,4 +45,19 @@ $(document).ready(function () {
         }
     });
 
+    let terrainCheckbox = document.getElementById('terrain');
+
+    terrainCheckbox.addEventListener('change', (event) => {
+
+        console.log(event);
+
+        if (event.target.checked) {
+
+            viewer.terrainProvider = cesiumWorldTerrainProvider;
+        
+        } else {
+
+            viewer.terrainProvider = ellipsoidTerrainProvider;
+        }
+    });
 });
