@@ -27,3 +27,18 @@ body,
     padding: 0.3rem;
     display: none;
 }
+
+#compute {
+    position: absolute;
+    z-index: 2;
+    bottom: 5rem;
+    left: 47%;
+    padding: .5rem .8rem;
+    background-color: lightslategray;
+    border: 1px solid lightgrey;
+    border-radius: 4px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    letter-spacing: 1px;
+    display: none;
+}

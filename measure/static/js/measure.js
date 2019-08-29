@@ -40,17 +40,9 @@ $(document).ready(function () {
         let windowPosition = click.position;
 
         if (windowPosition) {
-
-            let ray = viewer.camera.getPickRay(windowPosition);
-            let pickedPosition = viewer.scene.globe.pick(ray, viewer.scene);
              
             // using 2D window's position to get 3D world position
             let worldPosition = viewer.scene.pickPosition(windowPosition);
-
-            console.log('drawer position:');
-            console.log(pickedPosition);
-            console.log('our world position');
-            console.log(worldPosition);
 
             positions.push(worldPosition);
 
@@ -61,19 +53,6 @@ $(document).ready(function () {
                     image : 'static/image/pin_red.png',
                     pixelOffset : new Cesium.Cartesian2(0, -16),
                     scale : 1.0,
-                    width : 24,
-                    height : 32,
-                    disableDepthTestDistance: Number.POSITIVE_INFINITY
-                }
-            });
-
-            // create for pickedposition
-            viewer.entities.add({
-                position: pickedPosition,
-                billboard: {
-                    image : 'static/image/pin_red.png',
-                    pixelOffset : new Cesium.Cartesian2(0, -16),
-                    scale : 5.0,
                     width : 24,
                     height : 32,
                     disableDepthTestDistance: Number.POSITIVE_INFINITY
