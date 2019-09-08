@@ -1,7 +1,9 @@
 const DEBUG = true;
 
 // tileset path
-var TILESET = 'static/tile/cube/tileset.json';
+// var TILESET = 'static/tile/cube/tileset.json';
+var TILESET = 'static/tile/pyramid/tileset.json';
+// var TILESET = 'static/tile/cylinder/tileset.json';
 
 // 3DTileset entity
 var tileset;
@@ -122,7 +124,7 @@ $(document).ready(function () {
 
     load3DTileset(TILESET, false, () => {
 
-        translate(0, 0, 20);
+        translate(0, 0, 24);
         rotate(90, 0, 0);
         scale(100);
 
@@ -225,7 +227,6 @@ function load3DTileset(url, debug = false, callback) {
         url: url,
         skipLevelOfDetail: false,
         maximumScreenSpaceError: 16,
-
         debugColorizeTiles: debug,
         debugShowBoundingVolume: debug,
         // debugShowGeometricError: debug,
@@ -376,5 +377,5 @@ function restoreTilesetGeometricError() {
         }
     }
 
-    restore(tileset._root);
+    restoreError(tileset._root);
 }
