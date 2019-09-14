@@ -1,5 +1,10 @@
 const DEBUG = true;
 
+const OPTIONS = {
+    maximumScreenSpaceError: 64,
+    maximumMemoryUsage: 128
+};
+
 // tileset path
 var TILESET = 'static/tile/road/tile_0_0_0_tex/tileset.json';
 
@@ -20,14 +25,19 @@ $(document).ready(function () {
     
     load3DTileset(TILESET, DEBUG);
 
-    // start memory monitoring
     setTimeout(() => {
-        
+    
+        // start memory monitoring
         setInterval(() => {
             $('#memory-usage').text(Math.floor((tileset.totalMemoryUsageInBytes/1e6) * 100) / 100);
         }, 500);
 
-    }, 5000);
+        // set up field value
+        $('#maximum-error').val(tileset.maximumScreenSpaceError);
+        $('#maximum-memory').val(tileset.maximumMemoryUsage);
+        $('#debug').prop('checked', DEBUG);
+
+    }, 3000);
 
     $('#maximum-error').change(() => {
 
@@ -51,25 +61,48 @@ $(document).ready(function () {
 
         $('#mouse-position').text(event.clientX + ', ' + event.clientY);
     });
+
+    let canvas = document.querySelector('.cesium-widget > canvas');
+
+    canvas.addEventListener('webglcontextlost', (event) => {
+
+        console.log('loooooost');
+
+        setCookie('model_maxsse', tileset.maximumScreenSpaceError * 2);
+        setCookie('model_maxmem', tileset.maximumMemoryUsage / 2);
+    });
+
 });
 
 function load3DTileset(url, debug = false) {
+
+    // retrieve options from cookie
+
+    let maxSSE = OPTIONS.maximumScreenSpaceError;
+    let cookieMaxSSE = getCookie('model_maxsse');
+
+    if (cookieMaxSSE && cookieMaxSSE >= maxSSE) {
+
+        maxSSE = cookieMaxSSE;
+    }
+
+    let maxMem = OPTIONS.maximumMemoryUsage;
+    let cookieMaxMem = getCookie('model_maxmem');
+
+    if (cookieMaxMem && cookieMaxMem <= maxMem) {
+
+        maxMem = cookieMaxMem;
+    }
+
     tileset = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
         url : url,
-        skipLevelOfDetail: false,
-        maximumScreenSpaceError: 64,
+        maximumScreenSpaceError: maxSSE,
         debugColorizeTiles: debug,
-        // debugShowBoundingVolume: debug,
         debugShowGeometricError: debug,
+        maximumMemoryUsage: maxMem
     }));
 
     see();
-}
-
-function debug(de = true) {
-    tileset.debugColorizeTiles = de;
-    tileset.debugShowBoundingVolume = de;
-    //tileset.debugShowGeometricError = de;
 }
 
 function see() {

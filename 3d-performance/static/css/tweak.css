@@ -16,6 +16,10 @@ body,
     display: none;
 }
 
+.cesium-viewer-toolbar {
+    display: none;
+}
+
 #tweaker-container {
     position: absolute;
     display: inline-block;
