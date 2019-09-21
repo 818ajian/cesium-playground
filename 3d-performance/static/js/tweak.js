@@ -1,8 +1,14 @@
 const DEBUG = true;
 
 const OPTIONS = {
-    maximumScreenSpaceError: 64,
-    maximumMemoryUsage: 128
+    desktop: {
+        maximumScreenSpaceError: 128,
+        maximumMemoryUsage: 128
+    },
+    mobile: {
+        maximumScreenSpaceError: 256,
+        maximumMemoryUsage: 0
+    }
 };
 
 // tileset path
@@ -22,14 +28,14 @@ $(document).ready(function () {
         selectionIndicator: false,
         infoBox: false
     });
-    
+
     load3DTileset(TILESET, DEBUG);
 
     setTimeout(() => {
-    
+
         // start memory monitoring
         setInterval(() => {
-            $('#memory-usage').text(Math.floor((tileset.totalMemoryUsageInBytes/1e6) * 100) / 100);
+            $('#memory-usage').text(Math.floor((tileset.totalMemoryUsageInBytes / 1e6) * 100) / 100);
         }, 500);
 
         // set up field value
@@ -76,9 +82,11 @@ $(document).ready(function () {
 
 function load3DTileset(url, debug = false) {
 
+    let isMobile = detectMobile();
+
     // retrieve options from cookie
 
-    let maxSSE = OPTIONS.maximumScreenSpaceError;
+    let maxSSE = isMobile? OPTIONS.mobile.maximumScreenSpaceError : OPTIONS.desktop.maximumScreenSpaceError;
     let cookieMaxSSE = getCookie('model_maxsse');
 
     if (cookieMaxSSE && cookieMaxSSE >= maxSSE) {
@@ -86,7 +94,7 @@ function load3DTileset(url, debug = false) {
         maxSSE = cookieMaxSSE;
     }
 
-    let maxMem = OPTIONS.maximumMemoryUsage;
+    let maxMem = isMobile? OPTIONS.mobile.maximumMemoryUsage: OPTIONS.desktop.maximumMemoryUsage;
     let cookieMaxMem = getCookie('model_maxmem');
 
     if (cookieMaxMem && cookieMaxMem <= maxMem) {
@@ -95,7 +103,7 @@ function load3DTileset(url, debug = false) {
     }
 
     tileset = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
-        url : url,
+        url: url,
         maximumScreenSpaceError: maxSSE,
         debugColorizeTiles: debug,
         debugShowGeometricError: debug,
